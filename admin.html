@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scholarly Hub - Admin Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      background: #f0f4f8;
+    }
+    .navbar {
+      background: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .logo h2 {
+      color: #0a2540;
+      font-size: 1.5rem;
+    }
+    .logo span {
+      color: #1f6e8c;
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .badge {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .logout-btn {
+      background: #dc2626;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+    .admin-header {
+      background: linear-gradient(135deg, #1e3a5f, #0a2540);
+      color: white;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .two-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    .card {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .card h3 {
+      margin-bottom: 1.25rem;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #334155;
+      font-size: 0.85rem;
+    }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 0.75rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: #1f6e8c;
+    }
+    .btn-primary {
+      background: #1f6e8c;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+    .task-list {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .task-admin-item {
+      background: #f8fafc;
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-left: 3px solid #1f6e8c;
+    }
+    .task-title-admin {
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+    }
+    .completion-stats {
+      font-size: 0.75rem;
+      color: #475569;
+      margin-top: 0.5rem;
+    }
+    .progress-bar {
+      background: #e2e8f0;
+      border-radius: 1rem;
+      height: 6px;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+    .progress-fill {
+      background: #10b981;
+      height: 100%;
+      border-radius: 1rem;
+      transition: width 0.3s;
+    }
+    .user-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .user-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .message {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+    .success {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    @media (max-width: 768px) {
+      .two-columns { grid-template-columns: 1fr; }
+      .container { padding: 0 1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="navbar">
+  <div class="logo">
+    <h2>Scholarly<span>Hub</span> <span style="font-size:0.8rem; background:#1f6e8c20; padding:0.2rem 0.6rem; border-radius:1rem;">Admin</span></h2>
+  </div>
+  <div class="user-info">
+    <span class="badge" id="adminName"><i class="fas fa-crown"></i> Admin</span>
+    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="admin-header">
+    <h1><i class="fas fa-chalkboard-user"></i> Admin Control Panel</h1>
+    <p>Manage tasks, monitor user progress, and keep your scholarly community engaged.</p>
+  </div>
+
+  <div class="two-columns">
+    <!-- Left: Create Task -->
+    <div class="card">
+      <h3><i class="fas fa-plus-circle"></i> Post New Task</h3>
+      <form id="createTaskForm">
+        <div class="form-group">
+          <label>Task Title *</label>
+          <input type="text" id="taskTitle" required placeholder="e.g., Complete Chapter 5 Quiz">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="taskDesc" rows="3" placeholder="Provide details, resources, or instructions..."></textarea>
+        </div>
+        <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> Publish Task</button>
+        <div id="taskMessage" class="message" style="display: none;"></div>
+      </form>
+    </div>
+
+    <!-- Right: Statistics & Users -->
+    <div class="card">
+      <h3><i class="fas fa-chart-line"></i> Platform Overview</h3>
+      <div id="statsOverview">
+        <div><strong>Total Tasks:</strong> <span id="totalTasksCount">0</span></div>
+        <div><strong>Registered Users:</strong> <span id="totalUsersCount">0</span></div>
+      </div>
+      <hr style="margin: 1rem 0;">
+      <h4><i class="fas fa-users"></i> All Users</h4>
+      <div id="usersList" class="user-list">Loading...</div>
+    </div>
+  </div>
+
+  <!-- All Tasks with Progress -->
+  <div class="card" style="margin-top: 2rem;">
+    <h3><i class="fas fa-tasks"></i> All Tasks & Completion Progress</h3>
+    <div id="allTasksList" class="task-list">Loading tasks...</div>
+  </div>
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDm-PeCeRdlx6TKPEvKNdT93lMqb5D5O20",
+    authDomain: "urbanpay-c5aee.firebaseapp.com",
+    projectId: "urbanpay-c5aee",
+    storageBucket: "urbanpay-c5aee.firebasestorage.app",
+    messagingSenderId: "648155825006",
+    appId: "1:648155825006:web:16d6ea4dfab808920b777f",
+    measurementId: "G-CTKZN6VHPS"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let allUsers = [];
+  let allTasks = [];
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await auth.signOut();
+    window.location.href = 'register.html';
+  });
+
+  // Create Task
+  document.getElementById('createTaskForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('taskTitle').value.trim();
+    const description = document.getElementById('taskDesc').value.trim();
+    const msgDiv = document.getElementById('taskMessage');
+    
+    if (!title) {
+      msgDiv.textContent = 'Task title is required';
+      msgDiv.className = 'message error';
+      msgDiv.style.display = 'block';
+      setTimeout(() => msgDiv.style.display = 'none', 3000);
+      return;
+    }
+    
+    try {
+      await db.collection('tasks').add({
+        title: title,
+        description: description,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdBy: auth.currentUser?.uid,
+        completedBy: []
+      });
+      document.getElementById('taskTitle').value = '';
+      document.getElementById('taskDesc').value = '';
+      msgDiv.textContent = '✅ Task published successfully!';
+      msgDiv.className = 'message success';
+      msgDiv.style.display = 'block';
+      setTimeout(() => msgDiv.style.display = 'none', 3000);
+    } catch (error) {
+      msgDiv.textContent = 'Error: ' + error.message;
+      msgDiv.className = 'message error';
+      msgDiv.style.display = 'block';
+    }
+  });
+
+  // Load users
+  async function loadUsers() {
+    const snapshot = await db.collection('users').get();
+    allUsers = [];
+    snapshot.forEach(doc => {
+      allUsers.push({ id: doc.id, ...doc.data() });
+    });
+    document.getElementById('totalUsersCount').textContent = allUsers.length;
+    
+    const usersHtml = allUsers.map(user => `
+      <div class="user-item">
+        <span><i class="fas fa-user-circle"></i> ${escapeHtml(user.name || user.email)}</span>
+        <span class="badge" style="background:${user.role === 'admin' ? '#fef3c7' : '#e0e7ff'}">${user.role === 'admin' ? 'Admin' : 'User'}</span>
+      </div>
+    `).join('');
+    document.getElementById('usersList').innerHTML = usersHtml || '<p>No users found</p>';
+  }
+
+  // Render all tasks with progress
+  function renderAllTasks(tasks, usersCount) {
+    if (!tasks || tasks.length === 0) {
+      document.getElementById('allTasksList').innerHTML = '<div class="task-admin-item">No tasks posted yet. Create your first task!</div>';
+      return;
+    }
+    
+    document.getElementById('totalTasksCount').textContent = tasks.length;
+    
+    const tasksHtml = tasks.map(task => {
+      const completedCount = (task.completedBy || []).length;
+      const percent = usersCount > 0 ? (completedCount / usersCount) * 100 : 0;
+      return `
+        <div class="task-admin-item">
+          <div class="task-title-admin">
+            <strong>📌 ${escapeHtml(task.title)}</strong>
+            <span style="font-size:0.7rem; background:#e2e8f0; padding:0.2rem 0.6rem; border-radius:1rem;">${completedCount}/${usersCount} completed</span>
+          </div>
+          <div class="completion-stats">${escapeHtml(task.description || 'No description')}</div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${percent}%;"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    document.getElementById('allTasksList').innerHTML = tasksHtml;
+  }
+
+  // Real-time tasks listener
+  function listenToTasks() {
+    return db.collection('tasks').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+      allTasks = [];
+      snapshot.forEach(doc => {
+        allTasks.push({ id: doc.id, ...doc.data() });
+      });
+      renderAllTasks(allTasks, allUsers.filter(u => u.role !== 'admin').length);
+    });
+  }
+
+  let unsubscribeTasks = null;
+  
+  // Load admin data and verify
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      if (!userDoc.exists || userDoc.data().role !== 'admin') {
+        window.location.href = 'user.html';
+        return;
+      }
+      const adminName = userDoc.data().name || user.displayName || 'Admin';
+      document.getElementById('adminName').innerHTML = `<i class="fas fa-crown"></i> ${escapeHtml(adminName)}`;
+      
+      await loadUsers();
+      if (unsubscribeTasks) unsubscribeTasks();
+      unsubscribeTasks = listenToTasks();
+    } else {
+      window.location.href = 'register.html';
+    }
+  });
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+</script>
+</body>
+</html>
