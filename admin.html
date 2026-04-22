@@ -13,7 +13,6 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
     body { background: #f0f2f5; }
     .app-wrapper { display: flex; min-height: 100vh; }
-    /* Sidebar */
     .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: linear-gradient(180deg, #0a2540 0%, #1a3a4f 100%); color: white; transition: left 0.3s; z-index: 1000; overflow-y: auto; }
     .sidebar.open { left: 0; }
     .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; }
@@ -22,7 +21,6 @@
     .nav-item:hover { background: rgba(255,255,255,0.1); }
     .nav-item.active { background: #1f6e8c; border-left: 3px solid #ffb74d; }
     .nav-section-title { padding: 0.75rem 1.5rem; font-size: 0.7rem; text-transform: uppercase; color: #9bb7d0; letter-spacing: 1px; }
-    /* Main Content */
     .main-content { flex: 1; }
     .top-navbar { background: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 99; }
     .menu-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #1f6e8c; }
@@ -64,6 +62,9 @@
     .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 3000; }
     .modal-content { background: white; border-radius: 1.5rem; padding: 1.5rem; max-width: 500px; width: 90%; }
     .task-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .refresh-icon { cursor: pointer; padding: 0.3rem 0.8rem; background: #e2e8f0; border-radius: 2rem; font-size: 0.8rem; transition: 0.2s; }
+    .refresh-icon:hover { background: #cbd5e1; transform: rotate(180deg); }
+    .settings-panel { background: #fef9e6; border-radius: 1rem; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid #fde68a; }
     @media (max-width: 768px) { .dashboard-container { padding: 1rem; } .sidebar { width: 280px; } .card-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -74,6 +75,7 @@
     <div class="sidebar-nav">
       <div class="nav-section"><div class="nav-section-title">MANAGEMENT</div>
         <div class="nav-item" data-section="dashboard"><i class="fas fa-chart-line"></i> Dashboard</div>
+        <div class="nav-item" data-section="systemSettings"><i class="fas fa-cog"></i> System Settings</div>
         <div class="nav-item" data-section="users"><i class="fas fa-users"></i> Users</div>
         <div class="nav-item" data-section="allTasks"><i class="fas fa-tasks"></i> All Tasks</div>
         <div class="nav-item" data-section="postTasks"><i class="fas fa-plus-circle"></i> Post Task</div>
@@ -97,17 +99,29 @@
       <div class="user-info"><span class="badge" id="adminName"><i class="fas fa-crown"></i> Loading...</span><button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
     </div>
     <div class="dashboard-container" id="dashboardContainer">
-      <div id="dashboard" class="section-card"><div class="section-header"><h2>📊 Dashboard Overview</h2></div><div id="dashboardContent"><div class="empty-state">Loading...</div></div></div>
-      <div id="users" class="section-card"><div class="section-header"><h2>👥 Manage Users</h2><button id="refreshUsersBtn" class="btn-sm btn-primary">Refresh</button></div><div id="usersContent"><div class="empty-state">Loading users...</div></div></div>
-      <div id="allTasks" class="section-card"><div class="section-header"><h2>📋 All Tasks (Manage, Edit, Delete)</h2><button id="refreshTasksBtn" class="btn-sm btn-primary">Refresh</button></div><div id="allTasksContent"><div class="empty-state">Loading tasks...</div></div></div>
+      <div id="dashboard" class="section-card"><div class="section-header"><h2>📊 Dashboard Overview</h2><span class="refresh-icon" onclick="refreshAll()"><i class="fas fa-sync-alt"></i> Refresh</span></div><div id="dashboardContent"><div class="empty-state">Loading...</div></div></div>
+      
+      <div id="systemSettings" class="section-card"><div class="section-header"><h2>⚙️ System Settings</h2><span class="refresh-icon" onclick="loadSystemSettings()"><i class="fas fa-sync-alt"></i> Refresh</span></div><div id="systemSettingsContent"></div></div>
+      
+      <div id="users" class="section-card"><div class="section-header"><h2>👥 Manage Users</h2><span class="refresh-icon" onclick="loadUsers()"><i class="fas fa-sync-alt"></i> Refresh</span></div><div id="usersContent"><div class="empty-state">Loading users...</div></div></div>
+      
+      <div id="allTasks" class="section-card"><div class="section-header"><h2>📋 All Tasks (Manage, Edit, Delete)</h2><span class="refresh-icon" onclick="loadAllTasks()"><i class="fas fa-sync-alt"></i> Refresh</span></div><div id="allTasksContent"><div class="empty-state">Loading tasks...</div></div></div>
+      
       <div id="postTasks" class="section-card"><div class="section-header"><h2>📝 Post New Task</h2></div><div id="postTasksContent"></div></div>
-      <div id="pendingSubmissions" class="section-card"><div class="section-header"><h2>⏳ Pending Submissions</h2><button id="refreshPendingBtn" class="btn-sm btn-primary">Refresh</button></div><div id="pendingSubmissionsContent"><div class="empty-state">Loading...</div></div></div>
-      <div id="reviewedSubmissions" class="section-card"><div class="section-header"><h2>✅ Reviewed Submissions (Approved/Rejected)</h2><button id="refreshReviewedBtn" class="btn-sm btn-primary">Refresh</button></div><div id="reviewedSubmissionsContent"><div class="empty-state">Loading...</div></div></div>
-      <div id="manageWithdrawals" class="section-card"><div class="section-header"><h2>💰 Withdrawal Requests</h2></div><div id="withdrawalsContent"><div class="empty-state">Loading...</div></div></div>
-      <div id="manageSubscriptions" class="section-card"><div class="section-header"><h2>🎫 Subscription Management</h2></div><div id="subscriptionsContent"><div class="empty-state">Loading...</div></div></div>
-      <div id="topWriters" class="section-card"><div class="section-header"><h2>🏆 Top Writers Leaderboard</h2></div><div id="topWritersContent"><div class="empty-state">Loading...</div></div></div>
-      <div id="adjustWallet" class="section-card"><div class="section-header"><h2>💰 Adjust User Wallet</h2></div><div id="adjustWalletContent"><div class="empty-state">Loading users...</div></div></div>
-      <div id="supportTickets" class="section-card"><div class="section-header"><h2>🎫 Support Tickets</h2></div><div id="ticketsContent"><div class="empty-state">Loading tickets...</div></div></div>
+      
+      <div id="pendingSubmissions" class="section-card"><div class="section-header"><h2>⏳ Pending Submissions</h2><span class="refresh-icon" onclick="loadPendingSubmissions()"><i class="fas fa-sync-alt"></i> Refresh</span></div><div id="pendingSubmissionsContent"><div class="empty-state">Loading...</div></div></div>
+      
+      <div id="reviewedSubmissions" class="section-card"><div class="section-header"><h2>✅ Reviewed Submissions</h2><span class="refresh-icon" onclick="loadReviewedSubmissions()"><i class="fas fa-sync-alt"></i> Refresh</span></div><div id="reviewedSubmissionsContent"><div class="empty-state">Loading...</div></div></div>
+      
+      <div id="manageWithdrawals" class="section-card"><div class="section-header"><h2>💰 Withdrawal Requests</h2><span class="refresh-icon" onclick="loadWithdrawals()"><i class="fas fa-sync-alt"></i> Refresh</span></div><div id="withdrawalsContent"><div class="empty-state">Loading...</div></div></div>
+      
+      <div id="manageSubscriptions" class="section-card"><div class="section-header"><h2>🎫 Subscription Management</h2><span class="refresh-icon" onclick="loadSubscriptions()"><i class="fas fa-sync-alt"></i> Refresh</span></div><div id="subscriptionsContent"><div class="empty-state">Loading...</div></div></div>
+      
+      <div id="topWriters" class="section-card"><div class="section-header"><h2>🏆 Top Writers Leaderboard</h2><span class="refresh-icon" onclick="loadTopWriters()"><i class="fas fa-sync-alt"></i> Refresh</span></div><div id="topWritersContent"><div class="empty-state">Loading...</div></div></div>
+      
+      <div id="adjustWallet" class="section-card"><div class="section-header"><h2>💰 Adjust User Wallet</h2><span class="refresh-icon" onclick="loadAdjustWallet()"><i class="fas fa-sync-alt"></i> Refresh</span></div><div id="adjustWalletContent"><div class="empty-state">Loading users...</div></div></div>
+      
+      <div id="supportTickets" class="section-card"><div class="section-header"><h2>🎫 Support Tickets</h2><span class="refresh-icon" onclick="loadSupportTickets()"><i class="fas fa-sync-alt"></i> Refresh</span></div><div id="ticketsContent"><div class="empty-state">Loading tickets...</div></div></div>
     </div>
   </div>
 </div>
@@ -130,6 +144,7 @@
   let allSubmissions = [];
   let withdrawals = [];
   let subscriptionReqs = [];
+  let systemSettings = { minWithdrawal: 500, subscriptionPaymentLink: "https://pay.lipwa.app/p/6d0241c28" };
 
   function showToast(msg, type = 'success') {
     const toast = document.createElement('div');
@@ -143,7 +158,7 @@
   const sidebar = document.getElementById('sidebar');
   document.getElementById('menuBtn').onclick = () => sidebar.classList.add('open');
   document.getElementById('closeSidebarBtn').onclick = () => sidebar.classList.remove('open');
-  const sections = ['dashboard', 'users', 'allTasks', 'postTasks', 'pendingSubmissions', 'reviewedSubmissions', 'manageWithdrawals', 'manageSubscriptions', 'topWriters', 'adjustWallet', 'supportTickets'];
+  const sections = ['dashboard', 'systemSettings', 'users', 'allTasks', 'postTasks', 'pendingSubmissions', 'reviewedSubmissions', 'manageWithdrawals', 'manageSubscriptions', 'topWriters', 'adjustWallet', 'supportTickets'];
   function showSection(sectionId) {
     sections.forEach(s => document.getElementById(s)?.classList.remove('active-section'));
     document.getElementById(sectionId)?.classList.add('active-section');
@@ -156,6 +171,43 @@
   document.querySelectorAll('.nav-item').forEach(i => i.addEventListener('click', () => showSection(i.getAttribute('data-section'))));
 
   function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+
+  // ============ SYSTEM SETTINGS ============
+  async function loadSystemSettings() {
+    const settingsDoc = await db.collection('settings').doc('systemConfig').get();
+    if (settingsDoc.exists) {
+      systemSettings = settingsDoc.data();
+    } else {
+      await db.collection('settings').doc('systemConfig').set(systemSettings);
+    }
+    document.getElementById('systemSettingsContent').innerHTML = `
+      <div class="settings-panel">
+        <h3><i class="fas fa-hand-holding-usd"></i> Withdrawal Settings</h3>
+        <div class="input-group"><label>Minimum Withdrawal Amount (Ksh)</label><input type="number" id="minWithdrawalInput" value="${systemSettings.minWithdrawal || 500}" placeholder="Minimum withdrawal amount"></div>
+        <button class="btn-primary" id="saveMinWithdrawalBtn">Save Minimum Withdrawal</button>
+      </div>
+      <div class="settings-panel">
+        <h3><i class="fas fa-credit-card"></i> Subscription Payment Link</h3>
+        <div class="input-group"><label>Payment Redirect URL</label><input type="url" id="paymentLinkInput" value="${escapeHtml(systemSettings.subscriptionPaymentLink || 'https://pay.lipwa.app/p/6d0241c28')}" placeholder="https://..."></div>
+        <button class="btn-primary" id="savePaymentLinkBtn">Save Payment Link</button>
+        <p class="empty-state" style="margin-top:0.5rem; padding:0.5rem;"><small>⚠️ This link will be used when users click "Subscribe Now" in their dashboard.</small></p>
+      </div>
+    `;
+    document.getElementById('saveMinWithdrawalBtn')?.addEventListener('click', async () => {
+      const newMin = parseInt(document.getElementById('minWithdrawalInput').value);
+      if (newMin < 100) { showToast('Minimum withdrawal must be at least Ksh 100', 'error'); return; }
+      await db.collection('settings').doc('systemConfig').update({ minWithdrawal: newMin });
+      systemSettings.minWithdrawal = newMin;
+      showToast(`Minimum withdrawal updated to Ksh ${newMin}`, 'success');
+    });
+    document.getElementById('savePaymentLinkBtn')?.addEventListener('click', async () => {
+      const newLink = document.getElementById('paymentLinkInput').value;
+      if (!newLink) { showToast('Please enter a valid URL', 'error'); return; }
+      await db.collection('settings').doc('systemConfig').update({ subscriptionPaymentLink: newLink });
+      systemSettings.subscriptionPaymentLink = newLink;
+      showToast('Payment link updated successfully!', 'success');
+    });
+  }
 
   // ============ TASK CRUD OPERATIONS ============
   async function postTask(title, desc, reward) {
@@ -258,14 +310,14 @@
     const snapshot = await db.collection('users').get();
     allUsers = []; snapshot.forEach(doc => allUsers.push({ id: doc.id, ...doc.data(), active: doc.data().active !== false, subscriptionActive: doc.data().subscriptionActive || false }));
     if (allUsers.length === 0) { document.getElementById('usersContent').innerHTML = '<div class="empty-state">No users found</div>'; return; }
-    document.getElementById('usersContent').innerHTML = `<div class="table-responsive"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Wallet</th><th>Subscription</th><th>Status</th><th>Actions</th></tr></thead><tbody>${allUsers.map(u => `<tr><td>${escapeHtml(u.name)}</td><td>${escapeHtml(u.email)}</td><td><select onchange="updateUserRole('${u.id}', this.value)"><option ${u.role === 'admin' ? 'selected' : ''} value="admin">Admin</option><option ${u.role === 'user' ? 'selected' : ''} value="user">User</option></select></td><td>Ksh ${(u.walletBalance || 0).toFixed(2)}</td><td><button class="btn-sm ${u.subscriptionActive ? 'btn-success' : 'btn-warning'}" onclick="toggleSubscriptionStatus('${u.id}', ${u.subscriptionActive})">${u.subscriptionActive ? 'Active' : 'Inactive'}</button></td><td><span class="status-badge ${u.active ? 'status-approved' : 'status-rejected'}">${u.active ? 'Active' : 'Deactivated'}</span></td><td><button class="btn-sm btn-warning" onclick="sendPasswordReset('${u.email}')">Reset</button><button class="btn-sm ${u.active ? 'btn-danger' : 'btn-success'}" onclick="toggleUserActive('${u.id}', ${u.active})">${u.active ? 'Deactivate' : 'Activate'}</button><button class="btn-sm btn-primary" onclick="adjustWalletBalance('${u.id}', 100, 'Bonus')">+100</button></td></tr>`).join('')}</tbody></table></div>`;
+    document.getElementById('usersContent').innerHTML = `<div class="table-responsive"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Wallet</th><th>Subscription</th><th>Status</th><th>Actions</th></tr></thead><tbody>${allUsers.map(u => `<tr><td>${escapeHtml(u.name)}</td><td>${escapeHtml(u.email)}</td><td><select onchange="updateUserRole('${u.id}', this.value)"><option ${u.role === 'admin' ? 'selected' : ''} value="admin">Admin</option><option ${u.role === 'user' ? 'selected' : ''} value="user">User</option></select></td><td>Ksh ${(u.walletBalance || 0).toFixed(2)}</td><td><button class="btn-sm ${u.subscriptionActive ? 'btn-success' : 'btn-warning'}" onclick="toggleSubscriptionStatus('${u.id}', ${u.subscriptionActive})">${u.subscriptionActive ? 'Active' : 'Inactive'}</button></td><td><span class="status-badge ${u.active ? 'status-approved' : 'status-rejected'}">${u.active ? 'Active' : 'Deactivated'}</span></td><td><button class="btn-sm btn-warning" onclick="sendPasswordReset('${u.email}')">Reset</button><button class="btn-sm ${u.active ? 'btn-danger' : 'btn-success'}" onclick="toggleUserActive('${u.id}', ${u.active})">${u.active ? 'Deactivate' : 'Activate'}</button><button class="btn-sm btn-primary" onclick="adjustWalletBalance('${u.id}', 100, 'Bonus')">+100</button></td></tr>`).join('')}</tbody></table>`;
   }
 
   async function loadAllTasks() {
     const snapshot = await db.collection('tasks').orderBy('createdAt', 'desc').get();
     allTasks = []; snapshot.forEach(doc => allTasks.push({ id: doc.id, ...doc.data() }));
     if (allTasks.length === 0) { document.getElementById('allTasksContent').innerHTML = '<div class="empty-state">No tasks created yet</div>'; return; }
-    document.getElementById('allTasksContent').innerHTML = `<div class="card-grid">${allTasks.map(task => `<div class="task-card-admin"><div class="task-title"><strong>📌 ${escapeHtml(task.title)}</strong> <span class="task-reward" style="background:#10b981; padding:0.2rem 0.6rem; border-radius:2rem;">Ksh ${task.reward || 100}</span></div><div class="task-desc" style="margin:0.5rem 0;">${escapeHtml(task.description || 'No description')}</div><div class="task-meta"><small>Created: ${task.createdAt?.toDate ? new Date(task.createdAt.toDate()).toLocaleDateString() : 'Recently'}</small></div><div class="task-actions"><button class="btn-sm btn-warning edit-task" data-id="${task.id}" data-title="${escapeHtml(task.title)}" data-desc="${escapeHtml(task.description || '')}" data-reward="${task.reward || 100}"><i class="fas fa-edit"></i> Edit</button><button class="btn-sm btn-danger delete-task" data-id="${task.id}"><i class="fas fa-trash"></i> Delete</button></div></div>`).join('')}</div>`;
+    document.getElementById('allTasksContent').innerHTML = `<div class="card-grid">${allTasks.map(task => `<div class="task-card-admin"><div class="task-title"><strong>📌 ${escapeHtml(task.title)}</strong> <span style="background:#10b981; color:white; padding:0.2rem 0.6rem; border-radius:2rem;">Ksh ${task.reward || 100}</span></div><div class="task-desc" style="margin:0.5rem 0;">${escapeHtml(task.description || 'No description')}</div><div class="task-meta"><small>Created: ${task.createdAt?.toDate ? new Date(task.createdAt.toDate()).toLocaleDateString() : 'Recently'}</small></div><div class="task-actions"><button class="btn-sm btn-warning edit-task" data-id="${task.id}" data-title="${escapeHtml(task.title)}" data-desc="${escapeHtml(task.description || '')}" data-reward="${task.reward || 100}"><i class="fas fa-edit"></i> Edit</button><button class="btn-sm btn-danger delete-task" data-id="${task.id}"><i class="fas fa-trash"></i> Delete</button></div></div>`).join('')}</div>`;
     document.querySelectorAll('.edit-task').forEach(btn => btn.addEventListener('click', () => showEditModal(btn.dataset.id, btn.dataset.title, btn.dataset.desc, btn.dataset.reward)));
     document.querySelectorAll('.delete-task').forEach(btn => btn.addEventListener('click', () => deleteTask(btn.dataset.id)));
   }
@@ -345,13 +397,10 @@
 
   async function refreshAll() {
     await loadUsers(); await loadAllTasks(); await loadPendingSubmissions(); await loadReviewedSubmissions();
-    await loadWithdrawals(); await loadSubscriptions(); await loadTopWriters(); await loadAdjustWallet(); await loadSupportTickets(); await loadDashboard();
+    await loadWithdrawals(); await loadSubscriptions(); await loadTopWriters(); await loadAdjustWallet(); 
+    await loadSupportTickets(); await loadDashboard(); await loadSystemSettings();
     showToast('All data refreshed!', 'success');
   }
-  document.getElementById('refreshUsersBtn')?.addEventListener('click', refreshAll);
-  document.getElementById('refreshTasksBtn')?.addEventListener('click', refreshAll);
-  document.getElementById('refreshPendingBtn')?.addEventListener('click', refreshAll);
-  document.getElementById('refreshReviewedBtn')?.addEventListener('click', refreshAll);
 
   auth.onAuthStateChanged(async user => {
     if (!user) { window.location.href = 'register.html'; return; }
