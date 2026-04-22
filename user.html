@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scholarly Hub - User Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      background: #f0f4f8;
+    }
+    .navbar {
+      background: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .logo h2 {
+      color: #0a2540;
+      font-size: 1.5rem;
+    }
+    .logo span {
+      color: #1f6e8c;
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .badge {
+      background: #e2e8f0;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .logout-btn {
+      background: #dc2626;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .logout-btn:hover {
+      background: #b91c1c;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+    .welcome-card {
+      background: linear-gradient(135deg, #1f6e8c, #0a2540);
+      color: white;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .stats {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.2);
+      padding: 1rem;
+      border-radius: 1rem;
+      flex: 1;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 800;
+    }
+    .tasks-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .task-grid {
+      display: grid;
+      gap: 1rem;
+    }
+    .task-card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: all 0.2s;
+      border-left: 4px solid #1f6e8c;
+    }
+    .task-card.completed {
+      opacity: 0.75;
+      border-left-color: #10b981;
+      background: #f9fefb;
+    }
+    .task-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .task-desc {
+      color: #4b5563;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    .task-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #e5e7eb;
+    }
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 2rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .status-pending {
+      background: #fef3c7;
+      color: #d97706;
+    }
+    .status-completed {
+      background: #d1fae5;
+      color: #059669;
+    }
+    .btn-complete {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-complete:hover {
+      background: #059669;
+    }
+    .btn-undo {
+      background: #6b7280;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      background: white;
+      border-radius: 1rem;
+      color: #6b7280;
+    }
+    .loading {
+      text-align: center;
+      padding: 2rem;
+    }
+    @media (max-width: 768px) {
+      .container { padding: 0 1rem; }
+      .stats { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="navbar">
+  <div class="logo">
+    <h2>Scholarly<span>Hub</span></h2>
+  </div>
+  <div class="user-info">
+    <span class="badge" id="userNameDisplay"><i class="fas fa-user"></i> Loading...</span>
+    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="welcome-card">
+    <h1><i class="fas fa-tasks"></i> My Tasks</h1>
+    <p>Complete tasks assigned by administrators to track your progress.</p>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number" id="totalTasks">0</div>
+        <div>Total Tasks</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="completedTasks">0</div>
+        <div>Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="pendingTasks">0</div>
+        <div>Pending</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tasks-header">
+    <h2><i class="fas fa-list-check"></i> All Tasks</h2>
+  </div>
+  <div id="tasksContainer" class="task-grid">
+    <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading tasks...</div>
+  </div>
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDm-PeCeRdlx6TKPEvKNdT93lMqb5D5O20",
+    authDomain: "urbanpay-c5aee.firebaseapp.com",
+    projectId: "urbanpay-c5aee",
+    storageBucket: "urbanpay-c5aee.firebasestorage.app",
+    messagingSenderId: "648155825006",
+    appId: "1:648155825006:web:16d6ea4dfab808920b777f",
+    measurementId: "G-CTKZN6VHPS"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let currentUser = null;
+  let currentUserId = null;
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await auth.signOut();
+    window.location.href = 'register.html';
+  });
+
+  // Toggle task completion
+  async function toggleTaskCompletion(taskId, currentlyCompleted) {
+    if (!currentUserId) return;
+    const taskRef = db.collection('tasks').doc(taskId);
+    
+    await db.runTransaction(async (transaction) => {
+      const taskDoc = await transaction.get(taskRef);
+      if (!taskDoc.exists) return;
+      
+      let completedBy = taskDoc.data().completedBy || [];
+      if (currentlyCompleted) {
+        // Remove user from completed list
+        completedBy = completedBy.filter(id => id !== currentUserId);
+      } else {
+        // Add user to completed list
+        if (!completedBy.includes(currentUserId)) {
+          completedBy.push(currentUserId);
+        }
+      }
+      transaction.update(taskRef, { completedBy: completedBy });
+    });
+  }
+
+  // Render tasks
+  function renderTasks(tasks, userId) {
+    const container = document.getElementById('tasksContainer');
+    if (!tasks || tasks.length === 0) {
+      container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox fa-3x"></i><p>No tasks available yet. Check back later!</p></div>';
+      return;
+    }
+
+    let total = tasks.length;
+    let completed = 0;
+    
+    const tasksHtml = tasks.map(task => {
+      const isCompleted = task.completedBy && task.completedBy.includes(userId);
+      if (isCompleted) completed++;
+      
+      return `
+        <div class="task-card ${isCompleted ? 'completed' : ''}">
+          <div class="task-title">
+            <span>${escapeHtml(task.title)}</span>
+            <span class="status-badge ${isCompleted ? 'status-completed' : 'status-pending'}">
+              ${isCompleted ? '✓ Completed' : '⏳ Pending'}
+            </span>
+          </div>
+          <div class="task-desc">${escapeHtml(task.description || 'No description provided')}</div>
+          <div class="task-meta">
+            <small><i class="far fa-clock"></i> ${task.createdAt ? new Date(task.createdAt.toDate()).toLocaleDateString() : 'Recently'}</small>
+            ${!isCompleted ? 
+              `<button class="btn-complete" data-id="${task.id}"><i class="fas fa-check"></i> Mark Complete</button>` :
+              `<button class="btn-undo" data-id="${task.id}"><i class="fas fa-undo"></i> Undo</button>`
+            }
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = tasksHtml;
+    
+    // Update stats
+    document.getElementById('totalTasks').textContent = total;
+    document.getElementById('completedTasks').textContent = completed;
+    document.getElementById('pendingTasks').textContent = total - completed;
+
+    // Attach event listeners
+    document.querySelectorAll('.btn-complete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const taskId = btn.getAttribute('data-id');
+        toggleTaskCompletion(taskId, false);
+      });
+    });
+    
+    document.querySelectorAll('.btn-undo').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const taskId = btn.getAttribute('data-id');
+        toggleTaskCompletion(taskId, true);
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  // Load user data and tasks
+  async function loadUserData(user) {
+    currentUserId = user.uid;
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    if (userDoc.exists) {
+      const userName = userDoc.data().name || user.displayName || 'User';
+      document.getElementById('userNameDisplay').innerHTML = `<i class="fas fa-user"></i> ${escapeHtml(userName)}`;
+    }
+  }
+
+  // Listen to tasks in real-time
+  function listenToTasks(userId) {
+    return db.collection('tasks').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+      const tasks = [];
+      snapshot.forEach(doc => {
+        tasks.push({ id: doc.id, ...doc.data() });
+      });
+      renderTasks(tasks, userId);
+    });
+  }
+
+  let unsubscribeTasks = null;
+
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      currentUser = user;
+      await loadUserData(user);
+      
+      // Verify user is not admin (redirect if admin tries to access user page)
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      if (userDoc.exists && userDoc.data().role === 'admin') {
+        window.location.href = 'admin.html';
+        return;
+      }
+      
+      if (unsubscribeTasks) unsubscribeTasks();
+      unsubscribeTasks = listenToTasks(user.uid);
+    } else {
+      window.location.href = 'register.html';
+    }
+  });
+</script>
+</body>
+</html>
