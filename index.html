@@ -87,7 +87,7 @@
       color: #1e293b;
       font-size: 0.85rem;
     }
-    .form-group input, .form-group select {
+    .form-group input {
       width: 100%;
       padding: 0.875rem 1rem;
       border: 1.5px solid #e2e8f0;
@@ -96,7 +96,7 @@
       transition: all 0.2s;
       outline: none;
     }
-    .form-group input:focus, .form-group select:focus {
+    .form-group input:focus {
       border-color: #1f6e8c;
       box-shadow: 0 0 0 3px rgba(31,110,140,0.1);
     }
@@ -142,6 +142,15 @@
       font-size: 0.8rem;
       color: #64748b;
     }
+    .role-note {
+      text-align: center;
+      margin-top: 0.5rem;
+      font-size: 0.7rem;
+      color: #94a3b8;
+      background: #f8fafc;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -172,7 +181,7 @@
       </form>
     </div>
 
-    <!-- Registration Form -->
+    <!-- Registration Form (No Role Selection) -->
     <div id="registerForm" style="display: none;">
       <form id="registerFormElement">
         <div class="form-group">
@@ -187,15 +196,11 @@
           <label><i class="fas fa-lock"></i> Password</label>
           <input type="password" id="regPassword" required placeholder="Minimum 6 characters">
         </div>
-        <div class="form-group">
-          <label><i class="fas fa-user-tag"></i> Select Role</label>
-          <select id="regRole">
-            <option value="user">👤 Regular User - Complete tasks</option>
-            <option value="admin">👑 Administrator - Post & manage tasks</option>
-          </select>
-        </div>
         <button type="submit" class="btn-submit">Create Account <i class="fas fa-user-plus"></i></button>
       </form>
+      <div class="role-note">
+        <i class="fas fa-info-circle"></i> All new accounts are created as regular users. Admin access is granted by system administrators only.
+      </div>
     </div>
 
     <div id="messageDiv" class="message" style="display: none;"></div>
@@ -264,13 +269,18 @@
     messageDiv.style.display = 'none';
   }
 
-  // Helper: Save user role to Firestore
-  async function saveUserToFirestore(userId, email, name, role) {
+  // Save user to Firestore with role = 'user' (always)
+  async function saveUserToFirestore(userId, email, name) {
     try {
       await db.collection('users').doc(userId).set({
         name: name,
         email: email,
-        role: role,
+        role: 'user',  // Always set role to 'user' on registration
+        walletBalance: 0,
+        subscriptionActive: false,
+        acceptedTasks: [],
+        submittedTasks: [],
+        completedTasks: [],
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -281,13 +291,12 @@
     }
   }
 
-  // REGISTRATION
+  // REGISTRATION (No role selection)
   document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('regName').value.trim();
     const email = document.getElementById('regEmail').value.trim();
     const password = document.getElementById('regPassword').value;
-    const role = document.getElementById('regRole').value;
 
     if (!name || !email || !password) {
       showMessage('Please fill in all fields', 'error');
@@ -306,18 +315,14 @@
       // Update profile with name
       await user.updateProfile({ displayName: name });
       
-      // Save user data to Firestore
-      await saveUserToFirestore(user.uid, email, name, role);
+      // Save user data to Firestore with role 'user'
+      await saveUserToFirestore(user.uid, email, name);
       
-      showMessage(`Welcome ${name}! Redirecting to ${role} dashboard...`, 'success');
+      showMessage(`Welcome ${name}! Your account has been created. Redirecting...`, 'success');
       
-      // Redirect based on role
+      // Redirect to user dashboard (always user role)
       setTimeout(() => {
-        if (role === 'admin') {
-          window.location.href = 'admin.html';
-        } else {
-          window.location.href = 'user.html';
-        }
+        window.location.href = 'user.html';
       }, 1500);
       
     } catch (error) {
@@ -329,7 +334,7 @@
     }
   });
 
-  // LOGIN
+  // LOGIN - Redirects based on role from Firestore
   document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
@@ -349,7 +354,10 @@
       const userDoc = await db.collection('users').doc(user.uid).get();
       
       if (!userDoc.exists) {
-        showMessage('User profile not found. Please contact support.', 'error');
+        // If user document doesn't exist, create it with default role
+        await saveUserToFirestore(user.uid, email, user.displayName || email.split('@')[0]);
+        showMessage(`Welcome! Redirecting to dashboard...`, 'success');
+        setTimeout(() => window.location.href = 'user.html', 1000);
         return;
       }
       
@@ -388,6 +396,10 @@
         } else {
           window.location.href = 'user.html';
         }
+      } else {
+        // User exists in auth but not in Firestore - create record
+        await saveUserToFirestore(user.uid, user.email, user.displayName || user.email.split('@')[0]);
+        window.location.href = 'user.html';
       }
     }
   });
