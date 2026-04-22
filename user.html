@@ -3,520 +3,241 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Scholarly Hub - User Dashboard</title>
+  <title>Scholarly Hub - Advanced User Dashboard</title>
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-    }
-
-    body {
-      background: #f4f7fc;
-      min-height: 100vh;
-    }
-
-    /* App Layout */
-    .app-wrapper {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* SIDEBAR (Hamburger Menu) */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: -300px;
-      width: 300px;
-      height: 100%;
-      background: linear-gradient(180deg, #0a2540 0%, #1a3a4f 100%);
-      color: white;
-      transition: left 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-      z-index: 1000;
-      overflow-y: auto;
-      box-shadow: 2px 0 20px rgba(0,0,0,0.2);
-    }
-
-    .sidebar.open {
-      left: 0;
-    }
-
-    .sidebar-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .sidebar-header h3 {
-      font-size: 1.4rem;
-      font-weight: 700;
-    }
-
-    .sidebar-header h3 span {
-      color: #ffb74d;
-    }
-
-    .close-sidebar {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-
-    .sidebar-nav {
-      padding: 1rem 0;
-    }
-
-    .nav-section {
-      margin-bottom: 0.5rem;
-    }
-
-    .nav-section-title {
-      padding: 0.75rem 1.5rem;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #9bb7d0;
-      font-weight: 600;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 0.75rem 1.5rem;
-      color: #e2edf7;
-      text-decoration: none;
-      transition: all 0.2s;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
-
-    .nav-item i {
-      width: 24px;
-      font-size: 1.1rem;
-    }
-
-    .nav-item:hover {
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-
-    .nav-item.active {
-      background: #1f6e8c;
-      color: white;
-      border-left: 3px solid #ffb74d;
-    }
-
-    /* MAIN CONTENT */
-    .main-content {
-      flex: 1;
-      transition: margin-left 0.3s;
-      width: 100%;
-    }
-
-    /* Top Navbar */
-    .top-navbar {
-      background: white;
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .menu-btn {
-      background: none;
-      border: none;
-      font-size: 1.6rem;
-      cursor: pointer;
-      color: #1f6e8c;
-    }
-
-    .logo h2 {
-      font-size: 1.4rem;
-      color: #0a2540;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background: #f4f7fc; min-height: 100vh; }
+    .app-wrapper { display: flex; min-height: 100vh; }
+    /* Sidebar */
+    .sidebar { position: fixed; top: 0; left: -300px; width: 300px; height: 100%; background: linear-gradient(180deg, #0a2540 0%, #1a3a4f 100%); color: white; transition: left 0.3s; z-index: 1000; overflow-y: auto; }
+    .sidebar.open { left: 0; }
+    .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; }
+    .close-sidebar { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 0.75rem 1.5rem; color: #e2edf7; cursor: pointer; transition: 0.2s; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); }
+    .nav-item.active { background: #1f6e8c; border-left: 3px solid #ffb74d; }
+    .nav-section-title { padding: 0.75rem 1.5rem; font-size: 0.7rem; text-transform: uppercase; color: #9bb7d0; }
+    /* Main Content */
+    .main-content { flex: 1; }
+    .top-navbar { background: white; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+    .menu-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #1f6e8c; }
+    .logo h2 { font-size: 1.4rem; color: #0a2540; }
     .logo span { color: #1f6e8c; }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .badge {
-      background: #e2e8f0;
-      padding: 0.5rem 1rem;
-      border-radius: 2rem;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    .logout-btn {
-      background: #dc2626;
-      color: white;
-      border: none;
-      padding: 0.5rem 1.2rem;
-      border-radius: 2rem;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    /* Dashboard Content */
-    .dashboard-container {
-      padding: 2rem;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .section-card {
-      background: white;
-      border-radius: 1.5rem;
-      padding: 1.8rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      display: none;
-    }
-    .section-card.active-section {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px);}
-      to { opacity: 1; transform: translateY(0);}
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      border-bottom: 2px solid #eef2f8;
-      padding-bottom: 0.75rem;
-    }
-    .section-header h2 {
-      font-size: 1.5rem;
-      color: #0a2540;
-    }
-
-    /* Task Cards */
-    .task-grid {
-      display: grid;
-      gap: 1rem;
-    }
-    .task-card {
-      background: #f9fafc;
-      border-radius: 1rem;
-      padding: 1.25rem;
-      border-left: 4px solid #1f6e8c;
-      transition: 0.2s;
-    }
-    .task-card.completed {
-      border-left-color: #10b981;
-      opacity: 0.85;
-    }
-    .task-title {
-      font-weight: 700;
-      font-size: 1rem;
-      display: flex;
-      justify-content: space-between;
-    }
-    .status-badge {
-      padding: 0.2rem 0.7rem;
-      border-radius: 2rem;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
+    .user-info { display: flex; gap: 1rem; align-items: center; }
+    .badge { background: #e2e8f0; padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.8rem; font-weight: 600; }
+    .logout-btn { background: #dc2626; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 2rem; cursor: pointer; }
+    .dashboard-container { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    .section-card { background: white; border-radius: 1.5rem; padding: 1.8rem; margin-bottom: 2rem; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .section-card.active-section { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: translateY(0);} }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 2px solid #eef2f8; padding-bottom: 0.75rem; }
+    .task-card { background: #f9fafc; border-radius: 1rem; padding: 1.25rem; margin-bottom: 1rem; border-left: 4px solid #1f6e8c; transition: 0.2s; }
+    .task-title { font-weight: 700; font-size: 1rem; display: flex; justify-content: space-between; }
+    .status-badge { padding: 0.2rem 0.7rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 600; }
     .status-pending { background: #fef3c7; color: #d97706; }
     .status-completed { background: #d1fae5; color: #059669; }
-    .btn-sm {
-      padding: 0.3rem 1rem;
-      border-radius: 2rem;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 0.5rem;
-    }
+    .status-submitted { background: #dbeafe; color: #2563eb; }
+    .btn-sm { padding: 0.4rem 1rem; border-radius: 2rem; border: none; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
     .btn-primary-sm { background: #1f6e8c; color: white; }
     .btn-success-sm { background: #10b981; color: white; }
-    .wallet-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin: 1rem 0;
-    }
-    .wallet-card {
-      background: #f1f5f9;
-      padding: 1.2rem;
-      border-radius: 1rem;
-      text-align: center;
-    }
-    .input-group {
-      margin-bottom: 1rem;
-    }
-    .input-group input, .input-group select, .input-group textarea {
-      width: 100%;
-      padding: 0.7rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 0.8rem;
-    }
-    button {
-      cursor: pointer;
-    }
-    .support-ticket {
-      background: #fefce8;
-      padding: 1rem;
-      border-radius: 1rem;
-      margin-bottom: 1rem;
-    }
-    @media (max-width: 768px) {
-      .dashboard-container { padding: 1rem; }
-      .sidebar { width: 280px; }
-    }
-    .empty-state {
-      text-align: center;
-      padding: 2rem;
-      color: #6c757d;
-    }
-    hr { margin: 1rem 0; }
+    .btn-warning-sm { background: #f59e0b; color: white; }
+    .btn-danger-sm { background: #ef4444; color: white; }
+    .wallet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 1rem 0; }
+    .wallet-card { background: #f1f5f9; padding: 1.2rem; border-radius: 1rem; text-align: center; }
+    .input-group { margin-bottom: 1rem; }
+    .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.8rem; }
+    .progress-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 2000; flex-direction: column; color: white; }
+    .spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { text-align: center; padding: 2rem; color: #6c757d; }
+    .transaction-row { display: flex; justify-content: space-between; padding: 0.75rem; border-bottom: 1px solid #e2e8f0; }
+    @media (max-width: 768px) { .dashboard-container { padding: 1rem; } .sidebar { width: 280px; } }
   </style>
 </head>
 <body>
 <div class="app-wrapper">
-  <!-- Sidebar Menu -->
   <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <h3>Scholarly<span>Hub</span></h3>
-      <button class="close-sidebar" id="closeSidebarBtn"><i class="fas fa-times"></i></button>
-    </div>
+    <div class="sidebar-header"><h3>Scholarly<span>Hub</span></h3><button class="close-sidebar" id="closeSidebarBtn"><i class="fas fa-times"></i></button></div>
     <div class="sidebar-nav">
-      <div class="nav-section">
-        <div class="nav-section-title">MAIN</div>
+      <div class="nav-section"><div class="nav-section-title">MAIN</div>
         <div class="nav-item" data-section="availableJobs"><i class="fas fa-briefcase"></i> Available Jobs</div>
         <div class="nav-item" data-section="activeTasks"><i class="fas fa-play-circle"></i> Active Tasks</div>
-        <div class="nav-item" data-section="myTaskHistory"><i class="fas fa-history"></i> My Task History</div>
+        <div class="nav-item" data-section="myTaskHistory"><i class="fas fa-history"></i> Task History</div>
         <div class="nav-item" data-section="submitTasks"><i class="fas fa-upload"></i> Submit Tasks</div>
         <div class="nav-item" data-section="acceptedTasks"><i class="fas fa-check-circle"></i> Accepted Tasks</div>
         <div class="nav-item" data-section="approvedTasks"><i class="fas fa-clipboard-list"></i> Approved Tasks</div>
         <div class="nav-item" data-section="revision"><i class="fas fa-edit"></i> Revision</div>
       </div>
-      <div class="nav-section">
-        <div class="nav-section-title">FINANCE</div>
+      <div class="nav-section"><div class="nav-section-title">FINANCE</div>
         <div class="nav-item" data-section="myWallet"><i class="fas fa-wallet"></i> My Wallet</div>
-        <div class="nav-item" data-section="forex"><i class="fas fa-chart-line"></i> Forex</div>
         <div class="nav-item" data-section="withdraw"><i class="fas fa-hand-holding-usd"></i> Withdraw</div>
-        <div class="nav-item" data-section="token"><i class="fas fa-coins"></i> Token</div>
+        <div class="nav-item" data-section="transactions"><i class="fas fa-exchange-alt"></i> Transactions</div>
       </div>
-      <div class="nav-section">
-        <div class="nav-section-title">COMMUNITY</div>
+      <div class="nav-section"><div class="nav-section-title">COMMUNITY</div>
         <div class="nav-item" data-section="subscription"><i class="fas fa-trophy"></i> Subscription</div>
         <div class="nav-item" data-section="topWriters"><i class="fas fa-star"></i> Top Writers</div>
         <div class="nav-item" data-section="support"><i class="fas fa-headset"></i> Support</div>
-        <div class="nav-item" data-section="referrals"><i class="fas fa-users"></i> Referrals</div>
         <div class="nav-item" data-section="myAccount"><i class="fas fa-user-cog"></i> My Account</div>
       </div>
     </div>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
     <div class="top-navbar">
       <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
       <div class="logo"><h2>Scholarly<span>Hub</span></h2></div>
-      <div class="user-info">
-        <span class="badge" id="userNameBadge"><i class="fas fa-user"></i> Loading...</span>
-        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
-      </div>
+      <div class="user-info"><span class="badge" id="userNameBadge"><i class="fas fa-user"></i> Loading...</span><button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
     </div>
-
     <div class="dashboard-container" id="dashboardContainer">
-      <!-- Sections will be shown dynamically -->
-      <div id="availableJobs" class="section-card"><div class="section-header"><h2><i class="fas fa-briefcase"></i> Available Jobs</h2></div><div id="availableJobsContent">Loading tasks...</div></div>
-      <div id="activeTasks" class="section-card"><div class="section-header"><h2><i class="fas fa-play-circle"></i> Active Tasks (In Progress)</h2></div><div id="activeTasksContent">Loading...</div></div>
-      <div id="myTaskHistory" class="section-card"><div class="section-header"><h2><i class="fas fa-history"></i> My Task History</h2></div><div id="myTaskHistoryContent">Loading...</div></div>
-      <div id="submitTasks" class="section-card"><div class="section-header"><h2><i class="fas fa-upload"></i> Submit Work</h2></div><div id="submitTasksContent"><p class="empty-state">Select an active task to submit.</p></div></div>
-      <div id="acceptedTasks" class="section-card"><div class="section-header"><h2><i class="fas fa-check-circle"></i> Accepted Tasks</h2></div><div id="acceptedTasksContent">Loading...</div></div>
-      <div id="approvedTasks" class="section-card"><div class="section-header"><h2><i class="fas fa-clipboard-list"></i> Approved Tasks</h2></div><div id="approvedTasksContent">Loading...</div></div>
-      <div id="revision" class="section-card"><div class="section-header"><h2><i class="fas fa-edit"></i> Revision Requests</h2></div><div id="revisionContent">No revisions needed.</div></div>
-      <div id="myWallet" class="section-card"><div class="section-header"><h2><i class="fas fa-wallet"></i> My Wallet</h2></div><div id="walletContent">Loading balance...</div></div>
-      <div id="forex" class="section-card"><div class="section-header"><h2><i class="fas fa-chart-line"></i> Forex Trading Hub</h2></div><div id="forexContent"><p>Forex rates and mini simulator (demo).</p><div class="wallet-card">💱 EUR/USD: 1.0854 | GBP/USD: 1.2640</div></div></div>
-      <div id="withdraw" class="section-card"><div class="section-header"><h2><i class="fas fa-hand-holding-usd"></i> Withdraw Funds</h2></div><div id="withdrawContent"><div class="input-group"><label>Amount ($)</label><input type="number" id="withdrawAmount" placeholder="Min $10"></div><button id="requestWithdrawBtn" class="btn-primary-sm">Request Withdrawal</button><div id="withdrawMsg"></div></div></div>
-      <div id="token" class="section-card"><div class="section-header"><h2><i class="fas fa-coins"></i> Scholarly Token</h2></div><div id="tokenContent"><p>Earn tokens by completing tasks. 1 Token = $0.05 value.</p><div class="wallet-card">🎫 Your Token Balance: <strong id="tokenBalance">0</strong> SCT</div><button id="convertTokensBtn" class="btn-primary-sm">Convert to Wallet</button></div></div>
-      <div id="subscription" class="section-card"><div class="section-header"><h2><i class="fas fa-trophy"></i> Subscription Plans</h2></div><div id="subscriptionContent"><div class="wallet-grid"><div class="wallet-card"><h4>Free</h4><p>$0/mo</p><p>Basic access</p></div><div class="wallet-card"><h4>Pro Writer</h4><p>$19/mo</p><p>Priority tasks + bonus</p><button class="btn-primary-sm">Upgrade</button></div><div class="wallet-card"><h4>Elite</h4><p>$49/mo</p><p>Unlimited + 1-on-1</p><button class="btn-primary-sm">Upgrade</button></div></div></div></div>
-      <div id="topWriters" class="section-card"><div class="section-header"><h2><i class="fas fa-star"></i> Top Writers Leaderboard</h2></div><div id="topWritersContent">Loading top performers...</div></div>
-      <div id="support" class="section-card"><div class="section-header"><h2><i class="fas fa-headset"></i> Support Center</h2></div><div id="supportContent"><div class="support-ticket"><i class="fas fa-envelope"></i> <strong>Open a ticket</strong><textarea id="supportMsg" rows="2" placeholder="Describe your issue..." style="margin-top:8px;"></textarea><button id="submitTicketBtn" style="margin-top:8px;">Send</button></div></div></div>
-      <div id="referrals" class="section-card"><div class="section-header"><h2><i class="fas fa-users"></i> Referral Program</h2></div><div id="referralsContent"><p>Share your link: <code id="refLink">loading...</code></p><p>Earn 10% of referred user's task earnings.</p></div></div>
-      <div id="myAccount" class="section-card"><div class="section-header"><h2><i class="fas fa-user-cog"></i> My Account</h2></div><div id="accountContent"><div class="input-group"><label>Full Name</label><input id="accountName" placeholder="Name"></div><div class="input-group"><label>Email</label><input id="accountEmail" disabled></div><button id="updateProfileBtn">Update Profile</button></div></div>
+      <div id="availableJobs" class="section-card"><div class="section-header"><h2><i class="fas fa-briefcase"></i> Available Jobs</h2></div><div id="availableJobsContent"></div></div>
+      <div id="activeTasks" class="section-card"><div class="section-header"><h2><i class="fas fa-play-circle"></i> Active Tasks</h2></div><div id="activeTasksContent"></div></div>
+      <div id="myTaskHistory" class="section-card"><div class="section-header"><h2><i class="fas fa-history"></i> Task History</h2></div><div id="myTaskHistoryContent"></div></div>
+      <div id="submitTasks" class="section-card"><div class="section-header"><h2><i class="fas fa-upload"></i> Submit Work</h2></div><div id="submitTasksContent"></div></div>
+      <div id="acceptedTasks" class="section-card"><div class="section-header"><h2><i class="fas fa-check-circle"></i> Accepted Tasks</h2></div><div id="acceptedTasksContent"></div></div>
+      <div id="approvedTasks" class="section-card"><div class="section-header"><h2><i class="fas fa-clipboard-list"></i> Approved Tasks</h2></div><div id="approvedTasksContent"></div></div>
+      <div id="revision" class="section-card"><div class="section-header"><h2><i class="fas fa-edit"></i> Revision Requests</h2></div><div id="revisionContent"></div></div>
+      <div id="myWallet" class="section-card"><div class="section-header"><h2><i class="fas fa-wallet"></i> My Wallet</h2></div><div id="walletContent"></div></div>
+      <div id="withdraw" class="section-card"><div class="section-header"><h2><i class="fas fa-hand-holding-usd"></i> Withdraw Funds</h2></div><div id="withdrawContent"></div></div>
+      <div id="transactions" class="section-card"><div class="section-header"><h2><i class="fas fa-exchange-alt"></i> Transaction History</h2></div><div id="transactionsContent"></div></div>
+      <div id="subscription" class="section-card"><div class="section-header"><h2><i class="fas fa-trophy"></i> Subscription Plan</h2></div><div id="subscriptionContent"></div></div>
+      <div id="topWriters" class="section-card"><div class="section-header"><h2><i class="fas fa-star"></i> Top Writers</h2></div><div id="topWritersContent"></div></div>
+      <div id="support" class="section-card"><div class="section-header"><h2><i class="fas fa-headset"></i> Support</h2></div><div id="supportContent"></div></div>
+      <div id="myAccount" class="section-card"><div class="section-header"><h2><i class="fas fa-user-cog"></i> My Account</h2></div><div id="accountContent"></div></div>
     </div>
   </div>
 </div>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDm-PeCeRdlx6TKPEvKNdT93lMqb5D5O20",
-    authDomain: "urbanpay-c5aee.firebaseapp.com",
-    projectId: "urbanpay-c5aee",
-    storageBucket: "urbanpay-c5aee.firebasestorage.app",
-    messagingSenderId: "648155825006",
-    appId: "1:648155825006:web:16d6ea4dfab808920b777f",
-    measurementId: "G-CTKZN6VHPS"
-  };
+  const firebaseConfig = { apiKey: "AIzaSyDm-PeCeRdlx6TKPEvKNdT93lMqb5D5O20", authDomain: "urbanpay-c5aee.firebaseapp.com", projectId: "urbanpay-c5aee", storageBucket: "urbanpay-c5aee.firebasestorage.app", messagingSenderId: "648155825006", appId: "1:648155825006:web:16d6ea4dfab808920b777f", measurementId: "G-CTKZN6VHPS" };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 
   let currentUserUid = null;
-  let userData = { name: '', email: '', walletBalance: 1250, tokenBalance: 340 }; // demo wallet init
-  let allTasks = []; // store tasks
+  let userData = { name: '', email: '', walletBalance: 0, subscriptionActive: false, subscriptionRequest: null };
+  let allTasks = [];
 
-  // Sidebar logic
+  // Sidebar
   const sidebar = document.getElementById('sidebar');
-  const menuBtn = document.getElementById('menuBtn');
-  const closeSidebar = document.getElementById('closeSidebarBtn');
-  function openSidebar() { sidebar.classList.add('open'); }
-  function closeSidebarFn() { sidebar.classList.remove('open'); }
-  menuBtn.addEventListener('click', openSidebar);
-  closeSidebar.addEventListener('click', closeSidebarFn);
-  document.addEventListener('click', (e) => { if (!sidebar.contains(e.target) && !menuBtn.contains(e.target) && sidebar.classList.contains('open')) closeSidebarFn(); });
+  document.getElementById('menuBtn').onclick = () => sidebar.classList.add('open');
+  document.getElementById('closeSidebarBtn').onclick = () => sidebar.classList.remove('open');
+  const sections = ['availableJobs','activeTasks','myTaskHistory','submitTasks','acceptedTasks','approvedTasks','revision','myWallet','withdraw','transactions','subscription','topWriters','support','myAccount'];
+  function showSection(sectionId) { sections.forEach(s => document.getElementById(s)?.classList.remove('active-section')); document.getElementById(sectionId)?.classList.add('active-section'); sidebar.classList.remove('open'); document.querySelectorAll('.nav-item').forEach(i => { if(i.getAttribute('data-section')===sectionId) i.classList.add('active'); else i.classList.remove('active'); }); }
+  document.querySelectorAll('.nav-item').forEach(i => i.addEventListener('click', () => showSection(i.getAttribute('data-section'))));
 
-  // Navigation sections
-  const sections = ['availableJobs','activeTasks','myTaskHistory','submitTasks','acceptedTasks','approvedTasks','revision','myWallet','forex','withdraw','token','subscription','topWriters','support','referrals','myAccount'];
-  function showSection(sectionId) {
-    sections.forEach(sec => {
-      const el = document.getElementById(sec);
-      if (el) el.classList.remove('active-section');
-    });
-    const activeEl = document.getElementById(sectionId);
-    if (activeEl) activeEl.classList.add('active-section');
-    closeSidebarFn();
-    // highlight sidebar
-    document.querySelectorAll('.nav-item').forEach(item => {
-      if(item.getAttribute('data-section') === sectionId) item.classList.add('active');
-      else item.classList.remove('active');
-    });
-  }
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', () => { showSection(item.getAttribute('data-section')); });
-  });
-
-  // Helper to render tasks based on status
-  function renderTaskList(containerId, tasks, filterFn, showCompleteBtn = false) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    const filtered = tasks.filter(filterFn);
-    if (filtered.length === 0) { container.innerHTML = '<div class="empty-state">No tasks found</div>'; return; }
-    let html = '<div class="task-grid">';
-    filtered.forEach(task => {
-      const isCompleted = task.completedBy && task.completedBy.includes(currentUserUid);
-      html += `<div class="task-card ${isCompleted ? 'completed' : ''}">
-        <div class="task-title"><span>${escapeHtml(task.title)}</span><span class="status-badge ${isCompleted ? 'status-completed' : 'status-pending'}">${isCompleted ? 'Completed' : 'Pending'}</span></div>
-        <div>${escapeHtml(task.description || 'No description')}</div>
-        <div class="task-meta" style="margin-top:8px;">${showCompleteBtn && !isCompleted ? `<button class="btn-sm btn-success-sm complete-task-btn" data-id="${task.id}">Mark Complete</button>` : ''}</div>
-      </div>`;
-    });
-    html += '</div>';
-    container.innerHTML = html;
-    if (showCompleteBtn) document.querySelectorAll('.complete-task-btn').forEach(btn => btn.addEventListener('click', async (e) => { const tid = btn.getAttribute('data-id'); await toggleComplete(tid); }));
-  }
-
-  async function toggleComplete(taskId) {
-    const taskRef = db.collection('tasks').doc(taskId);
-    await db.runTransaction(async (t) => {
-      const doc = await t.get(taskRef);
-      let completedBy = doc.data()?.completedBy || [];
-      if (!completedBy.includes(currentUserUid)) completedBy.push(currentUserUid);
-      else completedBy = completedBy.filter(id => id !== currentUserUid);
-      t.update(taskRef, { completedBy });
-    });
-  }
-
-  function renderFinanceAndWallet() {
-    document.getElementById('walletContent').innerHTML = `<div class="wallet-card"><i class="fas fa-dollar-sign"></i> Balance: $${userData.walletBalance?.toFixed(2) || '0.00'}<br><small>Available for withdrawal</small></div>`;
-    document.getElementById('tokenBalance').innerText = userData.tokenBalance || 0;
-    document.getElementById('withdrawContent').innerHTML = `<div class="input-group"><label>Amount ($)</label><input type="number" id="withdrawAmount" placeholder="Min $10"></div><button id="requestWithdrawBtn" class="btn-primary-sm">Request Withdrawal</button><div id="withdrawMsg"></div>`;
-    const wBtn = document.getElementById('requestWithdrawBtn');
-    if (wBtn) wBtn.addEventListener('click', () => { const amt = parseFloat(document.getElementById('withdrawAmount')?.value); if (amt && amt <= userData.walletBalance && amt >= 10) { alert(`Withdrawal request for $${amt} submitted.`); userData.walletBalance -= amt; updateUserFinance(); } else alert('Invalid amount or insufficient balance.'); });
-    const convertBtn = document.getElementById('convertTokensBtn');
-    if (convertBtn) convertBtn.addEventListener('click', () => { if (userData.tokenBalance >= 10) { const value = userData.tokenBalance * 0.05; userData.walletBalance += value; userData.tokenBalance = 0; updateUserFinance(); alert(`Converted to $${value.toFixed(2)}`); } else alert('Need at least 10 tokens'); });
-  }
-
-  async function updateUserFinance() {
-    if (currentUserUid) await db.collection('users').doc(currentUserUid).update({ walletBalance: userData.walletBalance, tokenBalance: userData.tokenBalance });
-    renderFinanceAndWallet();
-  }
-
-  function loadUserDashboard() {
-    db.collection('tasks').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
-      const tasks = []; snapshot.forEach(d => tasks.push({ id: d.id, ...d.data() }));
-      allTasks = tasks;
-      // Available jobs (not completed by user)
-      renderTaskList('availableJobsContent', tasks, t => !(t.completedBy || []).includes(currentUserUid), true);
-      // Active tasks: tasks that user has accepted (simulate accepted as tasks they started? We'll treat active as tasks where user has NOT completed but interacted? Actually we use "active" as tasks in progress: we'll show tasks that are pending and user has started (simplified: all pending tasks)
-      renderTaskList('activeTasksContent', tasks, t => !(t.completedBy || []).includes(currentUserUid), true);
-      // Task history: completed tasks
-      renderTaskList('myTaskHistoryContent', tasks, t => (t.completedBy || []).includes(currentUserUid));
-      // Accepted tasks: same as pending for demo
-      renderTaskList('acceptedTasksContent', tasks, t => !(t.completedBy || []).includes(currentUserUid));
-      // Approved tasks: completed tasks
-      renderTaskList('approvedTasksContent', tasks, t => (t.completedBy || []).includes(currentUserUid));
-      // Revision: demo placeholder
-      document.getElementById('revisionContent').innerHTML = '<div class="empty-state">No revision requests. All good!</div>';
-      // Submit tasks section
-      document.getElementById('submitTasksContent').innerHTML = `<div class="empty-state">Select a pending task and click "Submit Work" after completing.</div><div class="task-grid" id="submitPendingList"></div>`;
-      const pendingSubmit = tasks.filter(t => !(t.completedBy || []).includes(currentUserUid));
-      let submitHtml = '';
-      pendingSubmit.forEach(t => { submitHtml += `<div class="task-card"><b>${escapeHtml(t.title)}</b><textarea id="sub_${t.id}" placeholder="Submit your work link/description..." rows="2"></textarea><button class="btn-primary-sm submit-work-btn" data-id="${t.id}">Submit for Review</button></div>`; });
-      document.getElementById('submitTasksContent').innerHTML = submitHtml || '<p>No pending tasks to submit.</p>';
-      document.querySelectorAll('.submit-work-btn').forEach(btn => btn.addEventListener('click', async (e) => { const tid = btn.getAttribute('data-id'); const textarea = document.getElementById(`sub_${tid}`); alert(`Task submitted: ${textarea?.value || 'No details'}. Admin will review.`); await toggleComplete(tid); }));
-    });
-    // Top writers (dummy)
-    document.getElementById('topWritersContent').innerHTML = '<div class="wallet-card">🥇 John Doe - 2450 pts<br>🥈 Jane Smith - 1980 pts<br>🥉 Mike Lee - 1420 pts</div>';
-    // Support ticket
-    const ticketBtn = document.getElementById('submitTicketBtn');
-    if (ticketBtn) ticketBtn.addEventListener('click', () => { const msg = document.getElementById('supportMsg')?.value; if(msg) alert(`Ticket sent: ${msg}`); else alert('Enter message'); });
-    // Referral link
-    if (currentUserUid) document.getElementById('refLink').innerText = `https://scholarlyhub.com/ref/${currentUserUid}`;
-    // My Account
-    document.getElementById('accountName').value = userData.name || '';
-    document.getElementById('accountEmail').value = userData.email || '';
-    document.getElementById('updateProfileBtn')?.addEventListener('click', async () => { const newName = document.getElementById('accountName').value; await db.collection('users').doc(currentUserUid).update({ name: newName }); userData.name = newName; document.getElementById('userNameBadge').innerHTML = `<i class="fas fa-user"></i> ${escapeHtml(newName)}`; alert('Profile updated'); });
-  }
+  function showProgress(message) { let div = document.createElement('div'); div.id='progressOverlay'; div.className='progress-overlay'; div.innerHTML=`<div class="spinner"></div><div>${message}</div>`; document.body.appendChild(div); }
+  function hideProgress() { document.getElementById('progressOverlay')?.remove(); }
 
   function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
 
-  auth.onAuthStateChanged(async (user) => {
-    if (!user) { window.location.href = 'register.html'; return; }
-    currentUserUid = user.uid;
-    const userDoc = await db.collection('users').doc(currentUserUid).get();
-    let role = 'user';
-    if (userDoc.exists) {
-      role = userDoc.data().role;
-      userData.name = userDoc.data().name || user.displayName;
-      userData.email = userDoc.data().email || user.email;
-      userData.walletBalance = userDoc.data().walletBalance || 1250;
-      userData.tokenBalance = userDoc.data().tokenBalance || 340;
-    } else {
-      await db.collection('users').doc(currentUserUid).set({ name: user.displayName, email: user.email, role: 'user', walletBalance: 1250, tokenBalance: 340 });
+  async function acceptTask(taskId, taskTitle) {
+    if (!userData.subscriptionActive) {
+      if(confirm("❌ You need an active subscription to accept tasks. Subscribe now for $3?")) showSection('subscription');
+      return;
     }
-    if (role === 'admin') { window.location.href = 'admin.html'; return; }
-    document.getElementById('userNameBadge').innerHTML = `<i class="fas fa-user"></i> ${escapeHtml(userData.name)}`;
-    await loadUserDashboard();
-    renderFinanceAndWallet();
-    showSection('availableJobs');
-  });
+    showProgress("Parsing your application... checking qualifications...");
+    await new Promise(r => setTimeout(r, 2000));
+    hideProgress();
+    alert("❌ Qualification Failed! You need an active subscription to qualify. Please subscribe.");
+    showSection('subscription');
+  }
+
+  async function submitWork(taskId, workText) {
+    if(!workText) return alert("Please paste your work link or description.");
+    await db.collection('submissions').add({ taskId, userId: currentUserUid, work: workText, status: 'pending', submittedAt: firebase.firestore.FieldValue.serverimestamp() });
+    alert("Work submitted! Pending admin approval.");
+    await db.collection('userTasks').doc(`${currentUserUid}_${taskId}`).set({ taskId, userId: currentUserUid, status: 'submitted' }, { merge: true });
+    showSection('myTaskHistory');
+  }
+
+  async function requestWithdraw(gateway, details, amount) {
+    if(amount < 500) return alert("Minimum withdrawal is Ksh 500");
+    if(amount > userData.walletBalance) return alert("Insufficient balance");
+    await db.collection('withdrawals').add({ userId: currentUserUid, gateway, details, amount, status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    await db.collection('transactions').add({ userId: currentUserUid, type: 'withdrawal', amount, status: 'pending', gateway, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    alert("Withdrawal request submitted for admin review.");
+    showSection('transactions');
+  }
+
+  async function requestSubscription(paymentMessage) {
+    if(!paymentMessage) return alert("Please paste your payment message from Lipwa.");
+    await db.collection('subscriptionRequests').add({ userId: currentUserUid, paymentMessage, status: 'pending', requestedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    alert("Subscription request submitted. Admin will review and activate within 24h.");
+    showSection('subscription');
+  }
+
+  function renderUI() {
+    // Available Jobs (not accepted/submitted/completed)
+    const available = allTasks.filter(t => !userData.acceptedTasks?.includes(t.id) && !userData.submittedTasks?.includes(t.id) && !userData.completedTasks?.includes(t.id));
+    document.getElementById('availableJobsContent').innerHTML = available.length ? available.map(t => `<div class="task-card"><div class="task-title"><span>${escapeHtml(t.title)}</span><span class="status-badge status-pending">Open</span></div><div>${escapeHtml(t.description)}</div><button class="btn-sm btn-primary-sm accept-task" data-id="${t.id}" data-title="${escapeHtml(t.title)}">📋 View Details & Accept</button></div>`).join('') : '<div class="empty-state">No jobs available</div>';
+    document.querySelectorAll('.accept-task').forEach(btn => btn.addEventListener('click', () => acceptTask(btn.dataset.id, btn.dataset.title)));
+
+    // Active Tasks (accepted but not submitted)
+    const active = allTasks.filter(t => userData.acceptedTasks?.includes(t.id) && !userData.submittedTasks?.includes(t.id));
+    document.getElementById('activeTasksContent').innerHTML = active.length ? active.map(t => `<div class="task-card"><div class="task-title"><span>${escapeHtml(t.title)}</span><span class="status-badge status-pending">In Progress</span></div><div>${escapeHtml(t.description)}</div><button class="btn-sm btn-warning-sm go-submit" data-id="${t.id}">📤 Go to Submit</button></div>`).join('') : '<div class="empty-state">No active tasks</div>';
+    document.querySelectorAll('.go-submit').forEach(btn => btn.addEventListener('click', () => { showSection('submitTasks'); }));
+
+    // Task History (all attempted: accepted, submitted, completed)
+    const history = allTasks.filter(t => userData.acceptedTasks?.includes(t.id));
+    document.getElementById('myTaskHistoryContent').innerHTML = history.length ? history.map(t => `<div class="task-card"><div class="task-title"><span>${escapeHtml(t.title)}</span><span class="status-badge ${userData.completedTasks?.includes(t.id) ? 'status-completed' : (userData.submittedTasks?.includes(t.id) ? 'status-submitted' : 'status-pending')}">${userData.completedTasks?.includes(t.id) ? 'Approved' : (userData.submittedTasks?.includes(t.id) ? 'Pending Approval' : 'Accepted')}</span></div><div>${escapeHtml(t.description)}</div></div>`).join('') : '<div class="empty-state">No task history</div>';
+
+    // Submit Tasks section
+    const pendingSubmit = allTasks.filter(t => userData.acceptedTasks?.includes(t.id) && !userData.submittedTasks?.includes(t.id));
+    document.getElementById('submitTasksContent').innerHTML = pendingSubmit.length ? pendingSubmit.map(t => `<div class="task-card"><b>${escapeHtml(t.title)}</b><textarea id="work_${t.id}" rows="3" placeholder="Paste your work link, Google Drive, or description..." style="width:100%; margin:10px 0;"></textarea><button class="btn-sm btn-success-sm submit-final" data-id="${t.id}">Submit Work</button></div>`).join('') : '<div class="empty-state">No tasks ready for submission</div>';
+    document.querySelectorAll('.submit-final').forEach(btn => btn.addEventListener('click', async () => { const tid = btn.dataset.id; const work = document.getElementById(`work_${tid}`).value; await submitWork(tid, work); }));
+
+    // Accepted Tasks (alias for active)
+    document.getElementById('acceptedTasksContent').innerHTML = active.length ? active.map(t => `<div class="task-card">${escapeHtml(t.title)}</div>`).join('') : '<div class="empty-state">No accepted tasks</div>';
+    document.getElementById('approvedTasksContent').innerHTML = allTasks.filter(t => userData.completedTasks?.includes(t.id)).length ? allTasks.filter(t => userData.completedTasks?.includes(t.id)).map(t => `<div class="task-card"><b>${escapeHtml(t.title)}</b><div>✅ Approved</div></div>`).join('') : '<div class="empty-state">No approved tasks yet</div>';
+    document.getElementById('revisionContent').innerHTML = '<div class="empty-state">No revision requests</div>';
+
+    // Wallet
+    document.getElementById('walletContent').innerHTML = `<div class="wallet-card"><i class="fas fa-dollar-sign"></i> Balance: Ksh ${userData.walletBalance?.toFixed(2) || '0.00'}<br><small>Available for withdrawal (min Ksh 500)</small></div>`;
+
+    // Withdraw
+    document.getElementById('withdrawContent').innerHTML = `<div class="input-group"><label>Select Gateway</label><select id="gatewaySelect"><option value="M-Pesa">M-Pesa</option><option value="Bank Transfer">Bank Transfer</option><option value="PayPal">PayPal</option></select></div><div class="input-group"><label>Payment Details (Phone/Account)</label><input id="paymentDetails" placeholder="e.g., 0712345678"></div><div class="input-group"><label>Amount (Ksh)</label><input type="number" id="withdrawAmount" placeholder="Min 500"></div><button id="withdrawBtn" class="btn-primary-sm">Request Withdrawal</button>`;
+    document.getElementById('withdrawBtn')?.addEventListener('click', () => { const gateway = document.getElementById('gatewaySelect').value; const details = document.getElementById('paymentDetails').value; const amount = parseFloat(document.getElementById('withdrawAmount').value); requestWithdraw(gateway, details, amount); });
+
+    // Transactions
+    if(userData.transactions) renderTransactions();
+
+    // Subscription
+    document.getElementById('subscriptionContent').innerHTML = `<div class="wallet-grid"><div class="wallet-card"><h4>📖 Pro Subscription</h4><p>✔️ Access to all available jobs<br>✔️ Priority task acceptance<br>✔️ Higher earning potential<br>✔️ Qualification guaranteed</p><p style="font-size:1.5rem; font-weight:bold;">$3 / month</p>${!userData.subscriptionActive ? '<button id="subscribeNowBtn" class="btn-primary-sm">Subscribe Now ($3)</button><div class="input-group" style="margin-top:1rem;"><label>Already subscribed? Paste payment message from Lipwa:</label><textarea id="paymentMessageText" rows="2" placeholder="Paste your M-Pesa/Lipwa confirmation message..."></textarea><button id="verifySubscriptionBtn" class="btn-warning-sm">Submit for Verification</button></div>' : '<span class="status-badge status-completed">✅ Active Subscription</span>'}</div></div>`;
+    document.getElementById('subscribeNowBtn')?.addEventListener('click', () => { window.open('https://pay.lipwa.app/p/6d0241c28', '_blank'); alert("After payment, paste the payment message below and click 'Submit for Verification'."); });
+    document.getElementById('verifySubscriptionBtn')?.addEventListener('click', () => { const msg = document.getElementById('paymentMessageText')?.value; requestSubscription(msg); });
+
+    // Top Writers
+    document.getElementById('topWritersContent').innerHTML = '<div class="wallet-card">🥇 James M. - 12,450 pts<br>🥈 Sarah W. - 9,820 pts<br>🥉 Peter O. - 7,340 pts</div>';
+    // Support
+    document.getElementById('supportContent').innerHTML = `<div class="input-group"><textarea id="supportMsg" rows="3" placeholder="Describe your issue..."></textarea></div><button id="sendSupportBtn" class="btn-primary-sm">Send Ticket</button>`;
+    document.getElementById('sendSupportBtn')?.addEventListener('click', () => { const msg = document.getElementById('supportMsg').value; if(msg){ alert(`Ticket sent: ${msg}`); db.collection('supportTickets').add({ userId: currentUserUid, message: msg, createdAt: new Date() }); } else alert('Enter message'); });
+    // Account
+    document.getElementById('accountContent').innerHTML = `<div class="input-group"><label>Full Name</label><input id="accountName" value="${escapeHtml(userData.name)}"></div><div class="input-group"><label>Email</label><input id="accountEmail" value="${escapeHtml(userData.email)}" disabled></div><button id="updateProfileBtn" class="btn-primary-sm">Update Profile</button>`;
+    document.getElementById('updateProfileBtn')?.addEventListener('click', async () => { const newName = document.getElementById('accountName').value; await db.collection('users').doc(currentUserUid).update({ name: newName }); userData.name = newName; document.getElementById('userNameBadge').innerHTML = `<i class="fas fa-user"></i> ${escapeHtml(newName)}`; alert('Profile updated'); });
+  }
+
+  async function renderTransactions() { const container = document.getElementById('transactionsContent'); if(!container) return; const txs = userData.transactions || []; if(txs.length===0) { container.innerHTML='<div class="empty-state">No transactions yet</div>'; return; } container.innerHTML = txs.map(tx => `<div class="transaction-row"><span>${tx.type}</span><span>Ksh ${tx.amount}</span><span class="status-badge ${tx.status==='approved'?'status-completed':'status-pending'}">${tx.status}</span><span>${new Date(tx.date).toLocaleDateString()}</span></div>`).join(''); }
+
+  async function loadUserData() {
+    const userDoc = await db.collection('users').doc(currentUserUid).get();
+    if(userDoc.exists) {
+      userData = { ...userData, ...userDoc.data(), walletBalance: userDoc.data().walletBalance || 0, subscriptionActive: userDoc.data().subscriptionActive || false, acceptedTasks: userDoc.data().acceptedTasks || [], submittedTasks: userDoc.data().submittedTasks || [], completedTasks: userDoc.data().completedTasks || [], transactions: userDoc.data().transactions || [] };
+      document.getElementById('userNameBadge').innerHTML = `<i class="fas fa-user"></i> ${escapeHtml(userData.name)}`;
+    } else await db.collection('users').doc(currentUserUid).set({ name: 'User', email: auth.currentUser.email, walletBalance: 0, subscriptionActive: false, acceptedTasks: [], submittedTasks: [], completedTasks: [], transactions: [] });
+  }
+
+  db.collection('tasks').orderBy('createdAt', 'desc').onSnapshot(async snapshot => { allTasks = []; snapshot.forEach(d => allTasks.push({ id: d.id, ...d.data() })); if(currentUserUid) await loadUserData(); renderUI(); });
+  db.collection('subscriptionRequests').where('userId', '==', currentUserUid).onSnapshot(snap => { snap.forEach(doc => { if(doc.data().status === 'approved' && !userData.subscriptionActive) { db.collection('users').doc(currentUserUid).update({ subscriptionActive: true }); userData.subscriptionActive = true; alert("🎉 Your subscription is now ACTIVE! You can accept tasks."); renderUI(); } }); });
+  db.collection('withdrawals').where('userId', '==', currentUserUid).onSnapshot(snap => { snap.forEach(doc => { if(doc.data().status === 'approved') { userData.walletBalance -= doc.data().amount; db.collection('users').doc(currentUserUid).update({ walletBalance: userData.walletBalance }); renderUI(); } }); });
+  db.collection('submissions').where('userId', '==', currentUserUid).onSnapshot(snap => { snap.forEach(doc => { if(doc.data().status === 'approved') { if(!userData.completedTasks?.includes(doc.data().taskId)) { userData.completedTasks = [...(userData.completedTasks||[]), doc.data().taskId]; const reward = 150; userData.walletBalance += reward; db.collection('users').doc(currentUserUid).update({ completedTasks: userData.completedTasks, walletBalance: userData.walletBalance }); alert(`✅ Task approved! +Ksh ${reward} added to wallet.`); renderUI(); } } }); });
+
+  auth.onAuthStateChanged(async user => { if(!user) { window.location.href = 'register.html'; return; } currentUserUid = user.uid; await loadUserData(); showSection('availableJobs'); });
   document.getElementById('logoutBtn').addEventListener('click', async () => { await auth.signOut(); window.location.href = 'index.html'; });
 </script>
 </body>
