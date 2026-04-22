@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scholarly Hub - Register / Login</title>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #0a2540 0%, #1f4a6e 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .auth-container {
+      width: 100%;
+      max-width: 500px;
+    }
+    .card {
+      background: white;
+      border-radius: 2rem;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      overflow: hidden;
+      padding: 2rem;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .logo h1 {
+      font-size: 2rem;
+      color: #0a2540;
+    }
+    .logo span {
+      color: #1f6e8c;
+    }
+    .logo p {
+      color: #64748b;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+    .toggle-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      background: #f1f5f9;
+      border-radius: 3rem;
+      padding: 0.25rem;
+    }
+    .toggle-btn {
+      flex: 1;
+      text-align: center;
+      padding: 0.75rem;
+      border: none;
+      background: transparent;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 2rem;
+      transition: all 0.2s;
+      color: #64748b;
+    }
+    .toggle-btn.active {
+      background: #1f6e8c;
+      color: white;
+      box-shadow: 0 2px 8px rgba(31,110,140,0.3);
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #1e293b;
+      font-size: 0.85rem;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 1rem;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: #1f6e8c;
+      box-shadow: 0 0 0 3px rgba(31,110,140,0.1);
+    }
+    .btn-submit {
+      width: 100%;
+      background: #1f6e8c;
+      color: white;
+      border: none;
+      padding: 0.875rem;
+      border-radius: 2rem;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+    }
+    .btn-submit:hover {
+      background: #0e5a74;
+      transform: translateY(-2px);
+    }
+    .message {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    .error {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+    .success {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+    .info {
+      background: #e0f2fe;
+      color: #0284c7;
+    }
+    .redirect-note {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+<div class="auth-container">
+  <div class="card">
+    <div class="logo">
+      <h1>Scholarly<span>Hub</span></h1>
+      <p>Learn, Collaborate, Achieve</p>
+    </div>
+
+    <div class="toggle-buttons">
+      <button class="toggle-btn" id="loginTabBtn">Login</button>
+      <button class="toggle-btn" id="registerTabBtn">Register</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginForm" style="display: none;">
+      <form id="loginFormElement">
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Email Address</label>
+          <input type="email" id="loginEmail" required placeholder="user@example.com">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Password</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn-submit">Sign In <i class="fas fa-arrow-right"></i></button>
+      </form>
+    </div>
+
+    <!-- Registration Form -->
+    <div id="registerForm" style="display: none;">
+      <form id="registerFormElement">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Full Name</label>
+          <input type="text" id="regName" required placeholder="John Doe">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Email Address</label>
+          <input type="email" id="regEmail" required placeholder="user@example.com">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Password</label>
+          <input type="password" id="regPassword" required placeholder="Minimum 6 characters">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-user-tag"></i> Select Role</label>
+          <select id="regRole">
+            <option value="user">👤 Regular User - Complete tasks</option>
+            <option value="admin">👑 Administrator - Post & manage tasks</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-submit">Create Account <i class="fas fa-user-plus"></i></button>
+      </form>
+    </div>
+
+    <div id="messageDiv" class="message" style="display: none;"></div>
+    <div class="redirect-note">
+      <i class="fas fa-shield-alt"></i> Secure authentication with Firebase
+    </div>
+  </div>
+</div>
+
+<script>
+  // Firebase Configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDm-PeCeRdlx6TKPEvKNdT93lMqb5D5O20",
+    authDomain: "urbanpay-c5aee.firebaseapp.com",
+    projectId: "urbanpay-c5aee",
+    storageBucket: "urbanpay-c5aee.firebasestorage.app",
+    messagingSenderId: "648155825006",
+    appId: "1:648155825006:web:16d6ea4dfab808920b777f",
+    measurementId: "G-CTKZN6VHPS"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // DOM Elements
+  const loginTab = document.getElementById('loginTabBtn');
+  const registerTab = document.getElementById('registerTabBtn');
+  const loginDiv = document.getElementById('loginForm');
+  const registerDiv = document.getElementById('registerForm');
+  const messageDiv = document.getElementById('messageDiv');
+
+  // Show Login form by default
+  loginTab.classList.add('active');
+  loginDiv.style.display = 'block';
+  registerDiv.style.display = 'none';
+
+  // Tab switching
+  loginTab.addEventListener('click', () => {
+    loginTab.classList.add('active');
+    registerTab.classList.remove('active');
+    loginDiv.style.display = 'block';
+    registerDiv.style.display = 'none';
+    hideMessage();
+  });
+
+  registerTab.addEventListener('click', () => {
+    registerTab.classList.add('active');
+    loginTab.classList.remove('active');
+    registerDiv.style.display = 'block';
+    loginDiv.style.display = 'none';
+    hideMessage();
+  });
+
+  function showMessage(text, type) {
+    messageDiv.textContent = text;
+    messageDiv.className = `message ${type}`;
+    messageDiv.style.display = 'block';
+    setTimeout(() => {
+      if (messageDiv) messageDiv.style.display = 'none';
+    }, 4000);
+  }
+
+  function hideMessage() {
+    messageDiv.style.display = 'none';
+  }
+
+  // Helper: Save user role to Firestore
+  async function saveUserToFirestore(userId, email, name, role) {
+    try {
+      await db.collection('users').doc(userId).set({
+        name: name,
+        email: email,
+        role: role,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      return true;
+    } catch (error) {
+      console.error("Firestore error:", error);
+      throw error;
+    }
+  }
+
+  // REGISTRATION
+  document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const role = document.getElementById('regRole').value;
+
+    if (!name || !email || !password) {
+      showMessage('Please fill in all fields', 'error');
+      return;
+    }
+    if (password.length < 6) {
+      showMessage('Password must be at least 6 characters', 'error');
+      return;
+    }
+
+    try {
+      showMessage('Creating account...', 'info');
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+      
+      // Update profile with name
+      await user.updateProfile({ displayName: name });
+      
+      // Save user data to Firestore
+      await saveUserToFirestore(user.uid, email, name, role);
+      
+      showMessage(`Welcome ${name}! Redirecting to ${role} dashboard...`, 'success');
+      
+      // Redirect based on role
+      setTimeout(() => {
+        if (role === 'admin') {
+          window.location.href = 'admin.html';
+        } else {
+          window.location.href = 'user.html';
+        }
+      }, 1500);
+      
+    } catch (error) {
+      let errorMsg = error.message;
+      if (error.code === 'auth/email-already-in-use') {
+        errorMsg = 'Email already registered. Please login instead.';
+      }
+      showMessage(errorMsg, 'error');
+    }
+  });
+
+  // LOGIN
+  document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    if (!email || !password) {
+      showMessage('Please enter email and password', 'error');
+      return;
+    }
+
+    try {
+      showMessage('Signing in...', 'info');
+      const userCredential = await auth.signInWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+      
+      // Fetch user role from Firestore
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      
+      if (!userDoc.exists) {
+        showMessage('User profile not found. Please contact support.', 'error');
+        return;
+      }
+      
+      const userRole = userDoc.data().role;
+      const userName = userDoc.data().name || user.displayName || 'User';
+      
+      showMessage(`Welcome back ${userName}! Redirecting...`, 'success');
+      
+      setTimeout(() => {
+        if (userRole === 'admin') {
+          window.location.href = 'admin.html';
+        } else {
+          window.location.href = 'user.html';
+        }
+      }, 1000);
+      
+    } catch (error) {
+      let errorMsg = 'Invalid email or password';
+      if (error.code === 'auth/user-not-found') {
+        errorMsg = 'No account found with this email. Please register first.';
+      } else if (error.code === 'auth/wrong-password') {
+        errorMsg = 'Incorrect password. Please try again.';
+      }
+      showMessage(errorMsg, 'error');
+    }
+  });
+
+  // Check if user is already logged in
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        const role = userDoc.data().role;
+        if (role === 'admin') {
+          window.location.href = 'admin.html';
+        } else {
+          window.location.href = 'user.html';
+        }
+      }
+    }
+  });
+</script>
+</body>
+</html>
